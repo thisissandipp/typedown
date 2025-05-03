@@ -1,5 +1,8 @@
+'use server';
+
 import { createClient } from '@/lib/supabase/server-client';
 import { type AuthError } from '@supabase/supabase-js';
+import { revalidatePath } from 'next/cache';
 
 export const signUpWithEmailAndPassword = async (
   email: string,
@@ -17,6 +20,7 @@ export const signUpWithEmailAndPassword = async (
   const { error } = await supabase.auth.signUp({ email, password, options: { data } });
 
   if (error) return error;
+  else revalidatePath('/', 'layout');
 };
 
 export const loginWithEmailAndPassword = async (
@@ -26,4 +30,5 @@ export const loginWithEmailAndPassword = async (
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return error;
+  else revalidatePath('/', 'layout');
 };
