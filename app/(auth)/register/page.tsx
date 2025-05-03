@@ -9,7 +9,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { loginWithEmailAndPassword } from '@/lib/auth-client';
+import { signUpWithEmailAndPassword } from '@/lib/auth-client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,31 +21,37 @@ import { toast } from 'sonner';
 import React from 'react';
 import { z } from 'zod';
 
-const loginFormSchema = z.object({
+const registerFormSchema = z.object({
+  name: z.string().min(3, {
+    message: 'Name must be at least 3 characters.',
+  }),
   email: z.string().email({ message: 'Email must be a valid one.' }),
   password: z.string().min(6, {
     message: 'Password must be at least 6 characters.',
   }),
 });
 
-export default function LoginPage({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
+export default function RegisterPage({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<'div'>) {
   const [isLoading, setIsLoading] = React.useState(false);
 
-  const form = useForm<z.infer<typeof loginFormSchema>>({
-    resolver: zodResolver(loginFormSchema),
+  const form = useForm<z.infer<typeof registerFormSchema>>({
+    resolver: zodResolver(registerFormSchema),
     defaultValues: {
       email: '',
       password: '',
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof loginFormSchema>) => {
+  const onSubmit = async (values: z.infer<typeof registerFormSchema>) => {
     setIsLoading(true);
-    const error = await loginWithEmailAndPassword(values.email, values.password);
+    const error = await signUpWithEmailAndPassword(values.email, values.password, values.name);
     if (error) {
-      toast("Sorry, we couldn't log you in!", { description: error.message });
+      toast("Sorry, we couldn't create your account!", { description: error.message });
     } else {
-      toast('Successfully logged in!', { description: 'Redirecting you to the home page.' });
+      toast('Successfully registerd!', { description: 'Redirecting you to the home page.' });
       redirect('/');
     }
     setIsLoading(false);
@@ -61,13 +67,28 @@ export default function LoginPage({ className, ...props }: React.ComponentPropsW
     >
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Login to typedown</CardTitle>
-          <CardDescription>Enter your credentials below to login</CardDescription>
+          <CardTitle className="text-2xl">Create new account</CardTitle>
+          <CardDescription>Enter your personal details below to sign up</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <div className="flex flex-col gap-6">
+                <div className="grid gap-2">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Full Name</FormLabel>
+                        <FormControl>
+                          <Input id="name" type="text" placeholder="John Doe" required {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 <div className="grid gap-2">
                   <FormField
                     control={form.control}
@@ -79,7 +100,7 @@ export default function LoginPage({ className, ...props }: React.ComponentPropsW
                           <Input
                             id="email"
                             type="email"
-                            placeholder="m@example.com"
+                            placeholder="john@doe.com"
                             required
                             {...field}
                           />
@@ -116,10 +137,10 @@ export default function LoginPage({ className, ...props }: React.ComponentPropsW
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      <p className="">Logging in...</p>
+                      <p className="">Creating your account...</p>
                     </>
                   ) : (
-                    'Login to your account'
+                    'Create your account'
                   )}
                 </Button>
                 <Button type="button" variant="outline" className="w-full">
@@ -127,9 +148,9 @@ export default function LoginPage({ className, ...props }: React.ComponentPropsW
                 </Button>
               </div>
               <div className="mt-4 text-center text-sm">
-                Don&apos;t have an account?{' '}
-                <a href="/register" className="underline underline-offset-4">
-                  Sign up
+                Already have an account?{' '}
+                <a href="/login" className="underline underline-offset-4">
+                  Login
                 </a>
               </div>
             </form>
