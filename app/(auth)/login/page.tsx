@@ -9,7 +9,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { loginWithEmailAndPassword } from '@/lib/auth-client';
+import { loginWithEmailAndPassword, signInWithGoogle } from '@/lib/auth-client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -122,8 +122,13 @@ export default function LoginPage({ className, ...props }: React.ComponentPropsW
                     'Login to your account'
                   )}
                 </Button>
-                <Button type="button" variant="outline" className="w-full">
-                  Login with Google
+                <Button
+                  type="button"
+                  onClick={signInWithGoogle}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Continue with Google
                 </Button>
               </div>
               <div className="mt-4 text-center text-sm">
