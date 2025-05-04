@@ -32,3 +32,9 @@ export const loginWithEmailAndPassword = async (
   if (error) return error;
   else revalidatePath('/', 'layout');
 };
+
+export const logOut = async () => {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  revalidatePath('/', 'layout');
+};
