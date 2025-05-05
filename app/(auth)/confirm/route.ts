@@ -1,5 +1,5 @@
+import { NextResponse, type NextRequest } from 'next/server';
 import { type EmailOtpType } from '@supabase/supabase-js';
-import { type NextRequest } from 'next/server';
 
 import { createClient } from '@/lib/supabase/server-client';
 import { redirect } from 'next/navigation';
@@ -10,6 +10,9 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get('type') as EmailOtpType | null;
   const next = searchParams.get('next') ?? '/';
 
+  const redirectTo = request.nextUrl.clone();
+  redirectTo.pathname = next;
+
   if (token_hash && type) {
     const supabase = await createClient();
 
@@ -18,7 +21,7 @@ export async function GET(request: NextRequest) {
       token_hash,
     });
     if (!error) {
-      redirect(next);
+      return NextResponse.redirect(redirectTo);
     } else {
       console.error('Error', error);
       redirect('/error');
@@ -26,5 +29,6 @@ export async function GET(request: NextRequest) {
   }
 
   console.error('Error in confirm link');
-  redirect('/error');
+  redirectTo.pathname = '/error';
+  return NextResponse.redirect(redirectTo);
 }

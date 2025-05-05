@@ -34,6 +34,18 @@ export const loginWithEmailAndPassword = async (
   else revalidatePath('/', 'layout');
 };
 
+export const sendPasswordResetLink = async (email: string): Promise<AuthError | void> => {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(email);
+  if (error) return error;
+};
+
+export const updatePassword = async (password: string): Promise<AuthError | void> => {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) return error;
+};
+
 export const signInWithGoogle = async (): Promise<AuthError | void> => {
   const supabase = await createClient();
 
