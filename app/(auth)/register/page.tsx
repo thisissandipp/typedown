@@ -10,12 +10,12 @@ import {
 } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { signInWithGoogle, signUpWithEmailAndPassword } from '@/lib/auth-client';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2, UserCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { redirect } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import React from 'react';
@@ -36,10 +36,12 @@ export default function RegisterPage({
   ...props
 }: React.ComponentPropsWithoutRef<'div'>) {
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isUserCreationSuccess, setIsUserCreationSuccess] = React.useState(false);
 
   const form = useForm<z.infer<typeof registerFormSchema>>({
     resolver: zodResolver(registerFormSchema),
     defaultValues: {
+      name: '',
       email: '',
       password: '',
     },
@@ -51,9 +53,10 @@ export default function RegisterPage({
     if (error) {
       toast("Sorry, we couldn't create your account!", { description: error.message });
     } else {
-      toast('Successfully registerd!', { description: 'Redirecting you to the home page.' });
-      redirect('/');
+      form.reset();
+      setIsUserCreationSuccess(true);
     }
+    setIsUserCreationSuccess(true);
     setIsLoading(false);
   };
 
@@ -65,7 +68,16 @@ export default function RegisterPage({
       )}
       {...props}
     >
-      <Card>
+      {isUserCreationSuccess && (
+        <Alert className="bg-green-100 dark:bg-green-900">
+          <UserCheck className="h-4 w-4" />
+          <AlertTitle>Successfully registered!</AlertTitle>
+          <AlertDescription className="text-gray-700 dark:text-gray-300">
+            Account created successfully. Please check your inbox to confirm your email.
+          </AlertDescription>
+        </Alert>
+      )}
+      <Card className="mt-4">
         <CardHeader>
           <CardTitle className="text-2xl">Create new account</CardTitle>
           <CardDescription>Enter your personal details below to sign up</CardDescription>

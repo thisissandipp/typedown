@@ -37,7 +37,7 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const authPaths = [
+  const publicRoutes = [
     '/login',
     '/register',
     '/confirm',
@@ -47,7 +47,11 @@ export async function updateSession(request: NextRequest) {
   ];
 
   // no user, potentially respond by redirecting the user to the login page
-  if (!user && !authPaths.some((path) => request.nextUrl.pathname.startsWith(path))) {
+  if (
+    !user &&
+    !publicRoutes.some((path) => request.nextUrl.pathname.startsWith(path)) &&
+    request.nextUrl.pathname !== '/'
+  ) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);

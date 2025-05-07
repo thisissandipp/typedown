@@ -46,7 +46,7 @@ export default function LoginPage({ className, ...props }: React.ComponentPropsW
       toast("Sorry, we couldn't log you in!", { description: error.message });
     } else {
       toast('Successfully logged in!', { description: 'Redirecting you to the home page.' });
-      redirect('/');
+      redirect('/documents');
     }
     setIsLoading(false);
   };

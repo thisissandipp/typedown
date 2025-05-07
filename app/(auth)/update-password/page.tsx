@@ -59,7 +59,7 @@ export default function UpdatePasswordPage({
       toast('Password has been reset successfully!', {
         description: 'Redirecting you shortly to the home page',
       });
-      redirect('/');
+      redirect('/documents');
     }
 
     setIsLoading(false);

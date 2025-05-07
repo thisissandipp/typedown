@@ -1,3 +1,5 @@
+'use client';
+
 import { logOut } from '@/lib/auth-client';
 
 export default function Home() {
