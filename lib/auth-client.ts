@@ -12,12 +12,7 @@ export const signUpWithEmailAndPassword = async (
 ): Promise<AuthError | void> => {
   const supabase = await createClient();
 
-  // Somehow define first name and last name from provided name
-  const nameArray = name.split(' ');
-  const lastName = nameArray.pop();
-  const firstName = nameArray.join(' ');
-
-  const data = { first_name: firstName, last_name: lastName };
+  const data = { full_name: name };
   const { error } = await supabase.auth.signUp({ email, password, options: { data } });
 
   if (error) return error;
