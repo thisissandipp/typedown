@@ -7,3 +7,14 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface Document {
+  id: string;
+  userId: string;
+  title: string;
+  content: string | null;
+  isArchived: boolean;
+  isFavorite: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
