@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/sidebar';
 import { Plus, type LucideIcon } from 'lucide-react';
 import { NavUser } from '@/components/nav-user';
+import { useRouter } from 'next/navigation';
 import { User } from '@/types';
 
 interface AppSidebarProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -19,6 +20,7 @@ interface SidebarGroupItem {
   title: string;
   actionIcon: LucideIcon;
   actionTooltip: string;
+  destination: string;
 }
 
 const sidebarGroupItems: SidebarGroupItem[] = [
@@ -26,10 +28,13 @@ const sidebarGroupItems: SidebarGroupItem[] = [
     title: 'Personal Workspace',
     actionIcon: Plus,
     actionTooltip: 'Add a document',
+    destination: '/documents/new',
   },
 ];
 
 export function AppSidebar({ user }: AppSidebarProps) {
+  const router = useRouter();
+
   return (
     <Sidebar variant="inset" collapsible="offcanvas">
       <SidebarHeader>
@@ -40,7 +45,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
         {sidebarGroupItems.map((groupItem) => (
           <SidebarGroup key={groupItem.title}>
             <SidebarGroupLabel>{groupItem.title}</SidebarGroupLabel>
-            <SidebarGroupAction>
+            <SidebarGroupAction onClick={() => router.push(groupItem.destination)}>
               <groupItem.actionIcon className="h-4 w-4" />
               <span className="sr-only">{groupItem.actionTooltip}</span>
             </SidebarGroupAction>
