@@ -18,3 +18,8 @@ export interface Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface SidebarDocument {
+  id: string;
+  title: string;
+}
