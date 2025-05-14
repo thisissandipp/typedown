@@ -26,10 +26,10 @@ export const documentsTable = pgTable('documents', {
     .references(() => usersTable.id, { onDelete: 'cascade' }),
   title: text('title').notNull(),
   content: text('content'),
-  isArchived: boolean('is_archived').default(false),
-  isFavorite: boolean('is_favorite').default(false),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+  isArchived: boolean('is_archived').notNull().default(false),
+  isFavorite: boolean('is_favorite').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const documentsRelations = relations(documentsTable, ({ one }) => ({

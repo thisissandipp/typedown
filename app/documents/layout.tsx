@@ -76,7 +76,7 @@ export default function DocumentsLayout({ children }: { children: React.ReactNod
       <AppSidebar user={user} documents={documents} />
       <SidebarInset>
         <main>
-          <SiteHeader />
+          <SiteHeader documents={documents} />
           {children}
         </main>
       </SidebarInset>

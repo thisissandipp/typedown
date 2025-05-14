@@ -12,10 +12,11 @@ import {
   SidebarMenuSkeleton,
   SidebarSeparator,
 } from '@/components/ui/sidebar';
+import { usePathname, useRouter } from 'next/navigation';
 import { NavUser } from '@/components/nav-user';
 import { SidebarDocument, User } from '@/types';
 import { FileText, Plus } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface AppSidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   user: User | null;
@@ -24,13 +25,14 @@ interface AppSidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function AppSidebar({ user, documents }: AppSidebarProps) {
   const router = useRouter();
+  const pathname = usePathname();
 
   return (
-    <Sidebar variant="inset" collapsible="offcanvas">
+    <Sidebar variant="floating" collapsible="offcanvas">
       <SidebarHeader>
         <NavUser displayName={user?.displayName} image={user?.image} email={user?.email} />
       </SidebarHeader>
-      <SidebarSeparator />
+      {/* <SidebarSeparator className='w-[48px]' /> */}
       <SidebarContent>
         <SidebarGroup key="personal-workspace">
           <SidebarGroupLabel>Personal Workspace</SidebarGroupLabel>
@@ -43,16 +45,19 @@ export function AppSidebar({ user, documents }: AppSidebarProps) {
               Array.from({ length: 3 }, (_, index) => <SidebarMenuSkeleton key={index} />)}
             <SidebarMenu>
               {documents &&
-                documents.map((item) => (
-                  <SidebarMenuItem key={item.id}>
-                    <SidebarMenuButton size="sm" asChild>
-                      <a href={`/documents/${item.id}`}>
-                        <FileText className="text-sidebar-foreground/60" />
-                        <span>{item.title}</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                documents.map((item) => {
+                  const isActive = pathname === `/documents/${item.id}`;
+                  return (
+                    <SidebarMenuItem key={item.id}>
+                      <SidebarMenuButton size="sm" asChild className={isActive ? 'bg-muted' : ''}>
+                        <Link href={`/documents/${item.id}`}>
+                          <FileText className="text-sidebar-foreground/60" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
