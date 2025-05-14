@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { useForm } from 'react-hook-form';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import Link from 'next/link';
 import React from 'react';
 import { z } from 'zod';
 
@@ -158,9 +159,9 @@ export default function RegisterPage({
               </div>
               <div className="mt-4 text-center text-sm">
                 Already have an account?{' '}
-                <a href="/login" className="underline underline-offset-4">
+                <Link href="/login" className="underline underline-offset-4">
                   Login
-                </a>
+                </Link>
               </div>
             </form>
           </Form>
