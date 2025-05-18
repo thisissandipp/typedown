@@ -1,12 +1,15 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { documentsTable } from '@/db/schema';
+import { eq, sql } from 'drizzle-orm';
 import { getUser } from '@/lib/auth';
 import { Document } from '@/types';
-import { eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { z } from 'zod';
 
 const uuidSchema = z.string().uuid();
+const updateDocumentSchema = z.object({
+  content: z.string().optional(),
+});
 
 export async function GET(
   req: NextRequest,
@@ -43,6 +46,68 @@ export async function GET(
     return NextResponse.json({ document: document satisfies Document }, { status: 200 });
   } catch (error) {
     console.error('Unknown error', error);
+    return NextResponse.json(
+      { message: `Internal server error while fetching document with id: ` },
+      { status: 500 },
+    );
+  }
+}
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+): Promise<NextResponse> {
+  try {
+    const user = await getUser();
+    if (!user) {
+      return NextResponse.json(
+        { message: 'Unauthorized or failed to get user from Supabase Auth.' },
+        { status: 401 },
+      );
+    }
+
+    const { id } = await params;
+    const parsedId = uuidSchema.safeParse(id);
+
+    if (!parsedId.success) {
+      return NextResponse.json({ message: parsedId.error.message }, { status: 400 });
+    }
+
+    const documentId = parsedId.data;
+
+    const body = await req.json();
+    const parsedBody = updateDocumentSchema.safeParse(body);
+
+    if (!parsedBody.success) {
+      return NextResponse.json({ message: parsedBody.error.message }, { status: 400 });
+    }
+
+    const { content } = parsedBody.data;
+
+    if (!content) {
+      return NextResponse.json({ message: 'No content to update.' }, { status: 400 });
+    }
+
+    const [existingDocument] = await db
+      .select({ userId: documentsTable.userId })
+      .from(documentsTable)
+      .where(eq(documentsTable.id, documentId));
+
+    if (!existingDocument || existingDocument.userId !== user.id) {
+      return NextResponse.json(
+        { message: 'Either the document is not found, or you are not allowed to access it.' },
+        { status: 404 },
+      );
+    }
+
+    await db
+      .update(documentsTable)
+      .set({ content, updatedAt: sql`now()` })
+      .where(eq(documentsTable.id, documentId));
+
+    return NextResponse.json({ message: 'Document updated successfully!' }, { status: 200 });
+  } catch (error) {
+    console.error('Error updating document', error);
     return NextResponse.json(
       { message: `Internal server error while fetching document with id: ` },
       { status: 500 },
