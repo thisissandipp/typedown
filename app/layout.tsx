@@ -1,5 +1,6 @@
 import { ThemeProvider } from '@/components/theme-provider';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { Provider as JotaiProvider } from 'jotai';
 import { Toaster } from '@/components/ui/sonner';
 import type { Metadata } from 'next';
 import './globals.css';
@@ -27,15 +28,17 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
-        <Toaster />
+        <JotaiProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+          <Toaster />
+        </JotaiProvider>
       </body>
     </html>
   );

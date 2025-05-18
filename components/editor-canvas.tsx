@@ -1,16 +1,18 @@
+import { contentAtom, lastSavedContentAtom, saveStatusAtom } from '@/store/document';
 import { Textarea } from '@/components/ui/textarea';
 import { useDebounce } from '@/hooks/use-debounce';
+import { useAtom } from 'jotai';
 import axios from 'axios';
 import React from 'react';
 
 interface EditorCanvasProps {
   documentId: string;
-  initialContent?: string;
 }
 
-export function EditorCanvas({ documentId, initialContent }: EditorCanvasProps) {
-  const [content, setContent] = React.useState(initialContent ?? '');
-  const [lastSavedContent, setLastSavedContent] = React.useState(initialContent ?? '');
+export function EditorCanvas({ documentId }: EditorCanvasProps) {
+  const [content, setContent] = useAtom(contentAtom);
+  const [, setSaveStatus] = useAtom(saveStatusAtom);
+  const [lastSavedContent, setLastSavedContent] = useAtom(lastSavedContentAtom);
 
   const saveToLocalStorage = React.useCallback(
     (...args: unknown[]) => {
@@ -30,20 +32,25 @@ export function EditorCanvas({ documentId, initialContent }: EditorCanvasProps) 
       const currentContent = args[0] as string;
       if (lastSavedContent === currentContent) return;
 
+      setSaveStatus('inProgress');
       try {
         const response = await axios.patch(`/api/documents/${documentId}`, {
           content: currentContent,
         });
         if (response.status === 200) {
           setLastSavedContent(currentContent);
+          setSaveStatus('success');
         } else {
           console.error('Failed to update document', response.data?.message || response.statusText);
+          setSaveStatus('failed');
         }
       } catch (error) {
         console.error('Error saving document:', error);
+      } finally {
+        setTimeout(() => setSaveStatus('initial'), 2000);
       }
     },
-    [documentId, lastSavedContent],
+    [documentId, lastSavedContent, setLastSavedContent, setSaveStatus],
   );
 
   const [debouncedSaveToServer] = useDebounce(saveToServer, 1000);
@@ -58,7 +65,7 @@ export function EditorCanvas({ documentId, initialContent }: EditorCanvasProps) 
   return (
     <Textarea
       className="mb-12"
-      value={content}
+      value={content ?? ''}
       placeholder="Start writing your document or thoughts..."
       onChange={handleContentChange}
     />
