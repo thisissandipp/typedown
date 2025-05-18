@@ -1,8 +1,10 @@
 'use client';
 
+import { contentAtom, documentAtom, lastSavedContentAtom } from '@/store/document';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EditorCanvas } from '@/components/editor-canvas';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { Badge } from '@/components/ui/badge';
 import { useParams } from 'next/navigation';
 import Markdown from 'react-markdown';
@@ -18,6 +20,10 @@ export default function Page() {
 
   const [document, setDocument] = React.useState<Document | null>(null);
   const [error, setError] = React.useState('');
+
+  const { content: currentContent, saveStatus, lastSavedContent } = useAtomValue(documentAtom);
+  const setCurrentContent = useSetAtom(contentAtom);
+  const setLastSavedContent = useSetAtom(lastSavedContentAtom);
 
   const [tab, setTab] = React.useState<'view' | 'edit'>('view');
 
@@ -39,6 +45,13 @@ export default function Page() {
 
     getDocument();
   }, [documentId]);
+
+  React.useEffect(() => {
+    if (document?.content) {
+      setCurrentContent(document.content);
+      setLastSavedContent(document.content);
+    }
+  }, [document?.content, setCurrentContent, setLastSavedContent]);
 
   if (error.length !== 0) {
     toast('An error has occurred', { description: error });
@@ -66,7 +79,16 @@ export default function Page() {
 
   return (
     <div className="relative isolate mx-auto max-w-4xl px-8 pt-14 lg:px-10">
-      <Badge variant="secondary">Content is up to date</Badge>
+      {saveStatus === 'inProgress' && <Badge variant="secondary">Syncing with server...</Badge>}
+      {saveStatus === 'success' && <Badge variant="secondary">Content is up to date</Badge>}
+      {saveStatus === 'failed' && <Badge variant="destructive">Sync failed</Badge>}
+      {saveStatus === 'initial' && currentContent !== lastSavedContent && (
+        <Badge variant="default">Unsaved changes</Badge>
+      )}
+      {saveStatus === 'initial' && currentContent === lastSavedContent && (
+        <Badge variant="secondary">Content is up to date</Badge>
+      )}
+
       <h1 className="mt-4 text-3xl font-semibold tracking-tight text-balance">{document.title}</h1>
       <Tabs
         defaultValue="view"
@@ -93,12 +115,12 @@ export default function Page() {
 
         <TabsContent value="view">
           <div className="prose prose-neutral dark:prose-invert pt-8">
-            <Markdown remarkPlugins={[remarkGfm]}>{document.content}</Markdown>
+            <Markdown remarkPlugins={[remarkGfm]}>{lastSavedContent ?? document.content}</Markdown>
           </div>
         </TabsContent>
         <TabsContent value="edit">
           <div className="pt-8">
-            <EditorCanvas initialContent={document.content ?? undefined} documentId={documentId} />
+            <EditorCanvas documentId={documentId} />
           </div>
         </TabsContent>
       </Tabs>
