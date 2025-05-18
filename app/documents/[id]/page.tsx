@@ -47,10 +47,8 @@ export default function Page() {
   }, [documentId]);
 
   React.useEffect(() => {
-    if (document?.content) {
-      setCurrentContent(document.content);
-      setLastSavedContent(document.content);
-    }
+    setCurrentContent(document?.content ?? undefined);
+    setLastSavedContent(document?.content ?? undefined);
   }, [document?.content, setCurrentContent, setLastSavedContent]);
 
   if (error.length !== 0) {
@@ -114,7 +112,7 @@ export default function Page() {
         </TabsList>
 
         <TabsContent value="view">
-          <div className="prose prose-neutral dark:prose-invert pt-8">
+          <div className="prose prose-neutral dark:prose-invert mb-12 pt-8">
             <Markdown remarkPlugins={[remarkGfm]}>{lastSavedContent ?? document.content}</Markdown>
           </div>
         </TabsContent>

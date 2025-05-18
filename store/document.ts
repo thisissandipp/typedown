@@ -9,7 +9,7 @@ export interface DocumentType {
 }
 
 const initialDocumentState: DocumentType = {
-  content: '',
+  content: undefined,
   saveStatus: 'initial',
   lastSavedContent: undefined,
 };
