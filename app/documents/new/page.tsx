@@ -8,10 +8,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { sidebarDocumentsAtom } from '@/store/sidebarDocuments';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useRouter } from 'next/navigation';
+import { useSetAtom } from 'jotai';
 import { toast } from 'sonner';
 import React from 'react';
 import axios from 'axios';
@@ -20,6 +22,8 @@ export default function NewDocumentPage() {
   const [title, setTitle] = React.useState('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const router = useRouter();
+
+  const setSidebarDocuments = useSetAtom(sidebarDocumentsAtom);
 
   const onCreate = async () => {
     setIsSubmitting(true);
@@ -39,6 +43,7 @@ export default function NewDocumentPage() {
         });
       }
 
+      setSidebarDocuments((docs) => (docs ? [{ id, title }, ...docs] : []));
       router.replace(`/documents/${id}`);
     } catch (error) {
       console.error('Error in creating document', error);

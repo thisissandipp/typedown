@@ -21,21 +21,24 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Copy, FileText, MoreHorizontal, Plus, SquarePen, StarOff, Trash2 } from 'lucide-react';
+import { sidebarDocumentsAtom } from '@/store/sidebarDocuments';
 import { usePathname, useRouter } from 'next/navigation';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { NavUser } from '@/components/nav-user';
-import { SidebarDocument, User } from '@/types';
+import { useAtomValue } from 'jotai';
+import { User } from '@/types';
 import Link from 'next/link';
 
 interface AppSidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   user: User | null;
-  documents: SidebarDocument[] | null;
 }
 
-export function AppSidebar({ user, documents }: AppSidebarProps) {
+export function AppSidebar({ user }: AppSidebarProps) {
   const isMobile = useIsMobile();
   const router = useRouter();
   const pathname = usePathname();
+
+  const documents = useAtomValue(sidebarDocumentsAtom);
 
   return (
     <Sidebar variant="floating" collapsible="offcanvas" className="border-r-0">

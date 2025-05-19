@@ -1,10 +1,12 @@
 'use client';
 
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { sidebarDocumentsAtom } from '@/store/sidebarDocuments';
 import { AppSidebar } from '@/components/app-sidebar';
 import { SiteHeader } from '@/components/site-header';
-import { SidebarDocument, User } from '@/types';
 import { redirect } from 'next/navigation';
+import { useAtom } from 'jotai';
+import { User } from '@/types';
 import { toast } from 'sonner';
 import React from 'react';
 import axios from 'axios';
@@ -12,7 +14,7 @@ import axios from 'axios';
 export default function DocumentsLayout({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<User | null>(null);
   const [error, setError] = React.useState<string>('');
-  const [documents, setDocuments] = React.useState<SidebarDocument[] | null>(null);
+  const [, setDocuments] = useAtom(sidebarDocumentsAtom);
 
   React.useEffect(() => {
     const syncAuthenticatedUserInfo = async () => {
@@ -63,7 +65,7 @@ export default function DocumentsLayout({ children }: { children: React.ReactNod
     };
 
     getUserDocuments();
-  }, [user]);
+  }, [user, setDocuments]);
 
   if (error.length !== 0) {
     toast('An error has occurred', {
@@ -73,10 +75,10 @@ export default function DocumentsLayout({ children }: { children: React.ReactNod
 
   return (
     <SidebarProvider>
-      <AppSidebar user={user} documents={documents} />
+      <AppSidebar user={user} />
       <SidebarInset>
         <main>
-          <SiteHeader documents={documents} />
+          <SiteHeader />
           {children}
         </main>
       </SidebarInset>

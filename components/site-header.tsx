@@ -1,16 +1,19 @@
+import { sidebarDocumentsAtom } from '@/store/sidebarDocuments';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
 import { useParams } from 'next/navigation';
-import { SidebarDocument } from '@/types';
+import { useAtomValue } from 'jotai';
 
-interface SiteHeaderProps {
-  documents: SidebarDocument[] | null;
-}
-
-export function SiteHeader({ documents }: SiteHeaderProps) {
+export function SiteHeader() {
   const params = useParams();
   const documentId = params?.id;
-  const activeDoc = documents?.find((doc) => doc.id === documentId);
+  const sidebarDocuments = useAtomValue(sidebarDocumentsAtom);
+
+  const activeDoc = sidebarDocuments?.find((doc) => doc.id === documentId);
+
+  console.log('Params', documentId);
+  console.log('Sidebar Documents', sidebarDocuments);
+  console.log('Avtive Doc', activeDoc);
 
   return (
     <header className="flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
