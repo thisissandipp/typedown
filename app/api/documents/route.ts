@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { SidebarDocument } from '@/store/sidebarDocuments';
 import { type InsertDocument } from '@/db/types';
 import { documentsTable } from '@/db/schema';
-import { SidebarDocument } from '@/types';
 import { desc, eq } from 'drizzle-orm';
 import { getUser } from '@/lib/auth';
 import { db } from '@/db';
