@@ -7,9 +7,13 @@ import { db } from '@/db';
 import { z } from 'zod';
 
 const uuidSchema = z.string().uuid();
+
 const updateDocumentSchema = z.object({
   content: z.string().optional(),
+  isFavorite: z.boolean().optional(),
 });
+
+type UpdateDocumentInput = z.infer<typeof updateDocumentSchema>;
 
 export async function GET(
   req: NextRequest,
@@ -82,9 +86,10 @@ export async function PATCH(
       return NextResponse.json({ message: parsedBody.error.message }, { status: 400 });
     }
 
-    const { content } = parsedBody.data;
+    const updateData = parsedBody.data;
+    const hasUpdate = Object.values(updateData).some((value) => value !== undefined);
 
-    if (!content) {
+    if (!hasUpdate) {
       return NextResponse.json({ message: 'No content to update.' }, { status: 400 });
     }
 
@@ -100,9 +105,15 @@ export async function PATCH(
       );
     }
 
+    const { content, isFavorite } = updateData;
+    const data: Partial<UpdateDocumentInput> = {};
+
+    if (content) data.content = content;
+    if (isFavorite) data.isFavorite = isFavorite;
+
     await db
       .update(documentsTable)
-      .set({ content, updatedAt: sql`now()` })
+      .set({ ...data, updatedAt: sql`now()` })
       .where(eq(documentsTable.id, documentId));
 
     return NextResponse.json({ message: 'Document updated successfully!' }, { status: 200 });

@@ -76,10 +76,14 @@ export default function Page() {
   }
 
   return (
-    <div className="relative isolate mx-auto max-w-4xl px-8 pt-14 lg:px-10">
+    <div className="relative isolate mx-auto max-w-3xl px-8 pt-14 lg:px-10">
       {saveStatus === 'inProgress' && <Badge variant="secondary">Syncing with server...</Badge>}
       {saveStatus === 'success' && <Badge variant="secondary">Content is up to date</Badge>}
-      {saveStatus === 'failed' && <Badge variant="destructive">Sync failed</Badge>}
+      {saveStatus === 'failed' && (
+        <Badge variant="destructive" className="text-[#F43F5E]">
+          Sync failed
+        </Badge>
+      )}
       {saveStatus === 'initial' && currentContent !== lastSavedContent && (
         <Badge variant="default">Unsaved changes</Badge>
       )}
@@ -92,7 +96,7 @@ export default function Page() {
         defaultValue="view"
         value={tab}
         onValueChange={(v) => setTab(v as 'view' | 'edit')}
-        className="w-full pt-12"
+        className="pt-12"
       >
         <TabsList className="grid w-[275px] grid-cols-2">
           <TabsTrigger
@@ -112,7 +116,7 @@ export default function Page() {
         </TabsList>
 
         <TabsContent value="view">
-          <div className="prose prose-neutral dark:prose-invert mb-12 pt-8">
+          <div className="prose prose-neutral dark:prose-invert mb-12 max-w-none pt-8">
             <Markdown remarkPlugins={[remarkGfm]}>{lastSavedContent ?? document.content}</Markdown>
           </div>
         </TabsContent>
