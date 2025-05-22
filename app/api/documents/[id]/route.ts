@@ -109,7 +109,7 @@ export async function PATCH(
     const data: Partial<UpdateDocumentInput> = {};
 
     if (content) data.content = content;
-    if (isFavorite) data.isFavorite = isFavorite;
+    if (isFavorite !== undefined) data.isFavorite = isFavorite;
 
     await db
       .update(documentsTable)

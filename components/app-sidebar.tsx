@@ -6,35 +6,18 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuAction,
-  SidebarMenuButton,
-  SidebarMenuItem,
   SidebarMenuSkeleton,
   SidebarSeparator,
 } from '@/components/ui/sidebar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  favoritesDocumentsAtom,
-  type SidebarDocument,
-  sidebarDocumentsAtom,
-  workspaceDocumentsAtom,
-} from '@/store/sidebarDocuments';
-import { Copy, FileText, MoreHorizontal, SquarePen, Star, StarOff, Trash2 } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { favoritesDocumentsAtom, workspaceDocumentsAtom } from '@/store/sidebarDocuments';
 import { Button } from '@/components/ui/button';
 import { NavUser } from '@/components/nav-user';
-import { useAtom, useAtomValue } from 'jotai';
+import { NavFavorites } from './nav-favorites';
+import { NavWorkspace } from './nav-workspace';
+import { useRouter } from 'next/navigation';
+import { SquarePen } from 'lucide-react';
+import { useAtomValue } from 'jotai';
 import { User } from '@/types';
-import { toast } from 'sonner';
-import Link from 'next/link';
-import axios from 'axios';
 
 interface AppSidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   user: User | null;
@@ -42,7 +25,6 @@ interface AppSidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function AppSidebar({ user }: AppSidebarProps) {
   const router = useRouter();
-  const pathname = usePathname();
 
   const workspaceDocuments = useAtomValue(workspaceDocumentsAtom);
   const favoriteDocuments = useAtomValue(favoritesDocumentsAtom);
@@ -71,151 +53,22 @@ export function AppSidebar({ user }: AppSidebarProps) {
             {!favoriteDocuments &&
               Array.from({ length: 3 }, (_, index) => <SidebarMenuSkeleton key={index} />)}
             <SidebarMenu>
-              {favoriteDocuments &&
-                favoriteDocuments.map((item) => {
-                  const isActive = pathname === `/documents/${item.id}`;
-                  return (
-                    <SidebarMenuItem key={item.id}>
-                      <SidebarMenuButton asChild className={isActive ? 'bg-muted' : ''}>
-                        <Link
-                          href={`/documents/${item.id}`}
-                          className="font-semibold tracking-tight"
-                        >
-                          <FileText className="text-sidebar-foreground/60" />
-                          <span className={isActive ? '' : 'text-muted-foreground'}>
-                            {item.title}
-                          </span>
-                        </Link>
-                      </SidebarMenuButton>
-                      <DropdownActions item={item} />
-                    </SidebarMenuItem>
-                  );
-                })}
+              {favoriteDocuments && <NavFavorites documents={favoriteDocuments} />}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
         <SidebarGroup key="workspace">
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
-          <SidebarGroupContent className="">
+          <SidebarGroupContent className="mt-1.5">
             {!workspaceDocuments &&
               Array.from({ length: 3 }, (_, index) => <SidebarMenuSkeleton key={index} />)}
             <SidebarMenu>
-              {workspaceDocuments &&
-                workspaceDocuments.map((item) => {
-                  const isActive = pathname === `/documents/${item.id}`;
-                  return (
-                    <SidebarMenuItem key={item.id}>
-                      <SidebarMenuButton asChild className={isActive ? 'bg-muted' : ''}>
-                        <Link
-                          href={`/documents/${item.id}`}
-                          className="font-semibold tracking-tight"
-                        >
-                          <FileText className="text-sidebar-foreground/60" />
-                          <span className={isActive ? '' : 'text-muted-foreground'}>
-                            {item.title}
-                          </span>
-                        </Link>
-                      </SidebarMenuButton>
-                      <DropdownActions item={item} />
-                    </SidebarMenuItem>
-                  );
-                })}
+              {workspaceDocuments && <NavWorkspace documents={workspaceDocuments} />}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-  );
-}
-
-function DropdownActions({ item }: { item: SidebarDocument }) {
-  const isMobile = useIsMobile();
-  const [sidebarDocuments, setSidebarDocuments] = useAtom(sidebarDocumentsAtom);
-
-  const handleFavoriteStatus = async (item: SidebarDocument) => {
-    if (!sidebarDocuments) return;
-
-    const previousValue = sidebarDocuments;
-    const documentsWithoutItem = sidebarDocuments.filter((document) => document.id !== item.id);
-    const updatedItem: SidebarDocument = { ...item, isFavorite: !item.isFavorite };
-
-    setSidebarDocuments([updatedItem, ...documentsWithoutItem]);
-
-    try {
-      const successMessage = item.isFavorite ? 'Removed from Favorites' : 'Added to Favorites';
-      const successDescription = (
-        <p>
-          The document: <strong>{item.title}</strong> is now{' '}
-          {item.isFavorite ? 'removed from' : 'added to'} Favorites.
-        </p>
-      );
-      const response = await axios.patch(`/api/documents/${item.id}`, {
-        isFavorite: !item.isFavorite,
-      });
-      if (response.status !== 200) {
-        setSidebarDocuments(previousValue);
-        console.error(
-          'Failed to update favorite status',
-          response.data?.message || response.statusText,
-        );
-        toast('Failed to update Favorite status', {
-          description: response.data?.message || response.statusText,
-        });
-      } else {
-        toast(successMessage, { description: successDescription });
-      }
-    } catch (error) {
-      setSidebarDocuments(previousValue);
-      console.error('Error updating favorite', error);
-      toast('Something went wrong', {
-        description: 'Internal server error while updating the favorite status',
-      });
-    }
-  };
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <SidebarMenuAction showOnHover>
-          <MoreHorizontal />
-          <span className="sr-only">More Options</span>
-        </SidebarMenuAction>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className="w-56 rounded-lg"
-        side={isMobile ? 'bottom' : 'right'}
-        align={isMobile ? 'end' : 'start'}
-      >
-        <DropdownMenuItem onClick={() => handleFavoriteStatus(item)}>
-          {item.isFavorite && (
-            <>
-              <StarOff className="text-muted-foreground" />
-              <span>Remove from Favorites</span>
-            </>
-          )}
-          {!item.isFavorite && (
-            <>
-              <Star className="text-muted-foreground" />
-              <span>Add to Favorites</span>
-            </>
-          )}
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <Copy className="text-muted-foreground" />
-          <span>Duplicate</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <SquarePen className="text-muted-foreground" />
-          <span>Rename document</span>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className="group">
-          <Trash2 className="text-muted-foreground group-hover:text-[#F43F5E]" />
-          <span className="group-hover:text-[#F43F5E]">Move to Trash</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
   );
 }
