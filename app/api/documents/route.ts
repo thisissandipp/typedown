@@ -60,6 +60,8 @@ export async function GET(): Promise<NextResponse> {
       .select({
         id: documentsTable.id,
         title: documentsTable.title,
+        isFavorite: documentsTable.isFavorite,
+        updatedAt: documentsTable.updatedAt,
       })
       .from(documentsTable)
       .where(eq(documentsTable.userId, user.id))
