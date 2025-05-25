@@ -43,7 +43,9 @@ export default function NewDocumentPage() {
         });
       }
 
-      setSidebarDocuments((docs) => (docs ? [{ id, title }, ...docs] : []));
+      setSidebarDocuments((docs) =>
+        docs ? [{ id, title, isFavorite: false, updatedAt: new Date() }, ...docs] : [],
+      );
       router.replace(`/documents/${id}`);
     } catch (error) {
       console.error('Error in creating document', error);

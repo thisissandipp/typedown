@@ -1,16 +1,28 @@
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { type SidebarDocument, sidebarDocumentsAtom } from '@/store/sidebarDocuments';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
+import { redirect, useParams } from 'next/navigation';
+import { Loader2, Star, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useParams } from 'next/navigation';
-import { Star } from 'lucide-react';
 import { useAtom } from 'jotai';
 import { toast } from 'sonner';
 import axios from 'axios';
+import React from 'react';
 
 export function SiteHeader() {
   const params = useParams();
   const documentId = params?.id;
+
+  const [trashDialogOpen, setTrashDialogOpen] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
   const [sidebarDocuments, setSidebarDocuments] = useAtom(sidebarDocumentsAtom);
 
   const activeDoc = sidebarDocuments?.find((doc) => doc.id === documentId);
@@ -56,6 +68,38 @@ export function SiteHeader() {
     }
   };
 
+  const handleDelete = async (item: SidebarDocument) => {
+    setIsDeleting(true);
+    let toBeRedirected = false;
+    try {
+      const response = await axios.delete(`/api/documents/${item.id}`);
+      if (response.status !== 204) {
+        console.error(
+          'Failed to delete the document',
+          response.data?.message || response.statusText,
+        );
+        toast('Failed to delete', {
+          description: response.data?.message || response.statusText,
+        });
+      } else {
+        const documentsWithoutItem = sidebarDocuments?.filter(
+          (document) => document.id !== item.id,
+        );
+        if (documentsWithoutItem) setSidebarDocuments(documentsWithoutItem);
+        toBeRedirected = true;
+      }
+    } catch (error) {
+      console.error('Error deleting document', error);
+      toast("Couldn't delete document", {
+        description: 'There was a problem deleting the document. Please try again.',
+      });
+    } finally {
+      setIsDeleting(false);
+      setTrashDialogOpen(false);
+      if (toBeRedirected) redirect('/documents');
+    }
+  };
+
   return (
     <header className="flex h-12 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
@@ -63,7 +107,7 @@ export function SiteHeader() {
         <Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
       </div>
       {activeDoc && (
-        <div className="flex items-center gap-2 px-4">
+        <div className="flex items-center gap-3 px-4">
           <>
             <Button
               variant="ghost"
@@ -75,10 +119,39 @@ export function SiteHeader() {
               {!activeDoc.isFavorite && <Star className="h-5 w-5" />}
               <span className="sr-only">Add to favorites</span>
             </Button>
-            {/* <Button className="bg-destructive/55 hover:bg-destructive/35 rounded-md" size="sm">
-                <Trash2 className="h-5 w-5 text-[#F43F5E]" />
-                <span className="sr-only">Delete document</span>
-              </Button> */}
+            <Dialog open={trashDialogOpen} onOpenChange={(status) => setTrashDialogOpen(status)}>
+              <DialogTrigger asChild>
+                <Button
+                  className="bg-destructive/35 hover:bg-destructive/55 h-7 w-7 rounded-md"
+                  size="icon"
+                >
+                  <Trash2 className="h-5 w-5 text-[#F43F5E]" />
+                  <span className="sr-only">Delete document</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogTitle>Are you absolutely sure?</DialogTitle>
+                <DialogDescription>
+                  This action cannot be undone. Are you sure you want to permanently delete this
+                  document?
+                </DialogDescription>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setTrashDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button variant="destructive" onClick={() => handleDelete(activeDoc)}>
+                    {isDeleting ? (
+                      <>
+                        <Loader2 className="animate-spin" />
+                        <p>Deleting...</p>
+                      </>
+                    ) : (
+                      'Delete'
+                    )}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </>
         </div>
       )}
