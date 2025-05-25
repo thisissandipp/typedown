@@ -51,7 +51,7 @@ export async function GET(
   } catch (error) {
     console.error('Unknown error', error);
     return NextResponse.json(
-      { message: `Internal server error while fetching document with id: ` },
+      { message: 'Internal server error while fetching document' },
       { status: 500 },
     );
   }
@@ -120,7 +120,51 @@ export async function PATCH(
   } catch (error) {
     console.error('Error updating document', error);
     return NextResponse.json(
-      { message: `Internal server error while fetching document with id: ` },
+      { message: 'Internal server error while updating document' },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+): Promise<NextResponse> {
+  try {
+    const user = await getUser();
+    if (!user) {
+      return NextResponse.json(
+        { message: 'Unauthorized or failed to get user from Supabase Auth.' },
+        { status: 401 },
+      );
+    }
+
+    const { id } = await params;
+    const parsed = uuidSchema.safeParse(id);
+
+    if (!parsed.success) {
+      return NextResponse.json({ message: parsed.error.message }, { status: 400 });
+    }
+
+    const [document] = await db
+      .select()
+      .from(documentsTable)
+      .where(eq(documentsTable.id, parsed.data));
+
+    if (!document || document.userId !== user.id) {
+      return NextResponse.json(
+        { message: 'Either the document is not found, or you are not allowed to access it.' },
+        { status: 404 },
+      );
+    }
+
+    await db.delete(documentsTable).where(eq(documentsTable.id, parsed.data));
+    // return NextResponse.json(null, { status: 204 });
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    console.error('Unknown error', error);
+    return NextResponse.json(
+      { message: 'Internal server error while deleting document' },
       { status: 500 },
     );
   }
