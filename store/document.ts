@@ -3,18 +3,25 @@ import { atom } from 'jotai';
 export type DocumentSaveStatus = 'initial' | 'inProgress' | 'success' | 'failed';
 
 export interface DocumentType {
+  title: string;
   content?: string;
   saveStatus: DocumentSaveStatus;
   lastSavedContent?: string;
 }
 
 const initialDocumentState: DocumentType = {
+  title: '',
   content: undefined,
   saveStatus: 'initial',
   lastSavedContent: undefined,
 };
 
 export const documentAtom = atom<DocumentType>(initialDocumentState);
+
+export const titleAtom = atom(
+  (get) => get(documentAtom).title,
+  (get, set, newTitle: string) => set(documentAtom, (prev) => ({ ...prev, title: newTitle })),
+);
 
 export const contentAtom = atom(
   (get) => get(documentAtom).content,

@@ -113,7 +113,7 @@ export function SiteHeader() {
               variant="ghost"
               size="icon"
               onClick={() => updateFavoriteStatus(activeDoc)}
-              className="bg-accent dark:bg-accent/50 h-7 w-7"
+              className="bg-accent dark:bg-accent/50 h-7 w-7 hover:text-[#F59E0D]"
             >
               {activeDoc.isFavorite && <Star className="h-5 w-5 fill-current text-[#F59E0D]" />}
               {!activeDoc.isFavorite && <Star className="h-5 w-5" />}

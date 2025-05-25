@@ -9,6 +9,7 @@ import { z } from 'zod';
 const uuidSchema = z.string().uuid();
 
 const updateDocumentSchema = z.object({
+  title: z.string().optional(),
   content: z.string().optional(),
   isFavorite: z.boolean().optional(),
 });
@@ -105,9 +106,10 @@ export async function PATCH(
       );
     }
 
-    const { content, isFavorite } = updateData;
+    const { title, content, isFavorite } = updateData;
     const data: Partial<UpdateDocumentInput> = {};
 
+    if (title) data.title = title;
     if (content) data.content = content;
     if (isFavorite !== undefined) data.isFavorite = isFavorite;
 
