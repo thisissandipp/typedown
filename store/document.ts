@@ -7,6 +7,7 @@ export interface DocumentType {
   content?: string;
   saveStatus: DocumentSaveStatus;
   lastSavedContent?: string;
+  lastUpdatedAt?: Date;
 }
 
 const initialDocumentState: DocumentType = {
@@ -14,6 +15,7 @@ const initialDocumentState: DocumentType = {
   content: undefined,
   saveStatus: 'initial',
   lastSavedContent: undefined,
+  lastUpdatedAt: undefined,
 };
 
 export const documentAtom = atom<DocumentType>(initialDocumentState);
@@ -39,4 +41,10 @@ export const lastSavedContentAtom = atom(
   (get) => get(documentAtom).lastSavedContent,
   (get, set, newLastSavedDocument?: string) =>
     set(documentAtom, (prev) => ({ ...prev, lastSavedContent: newLastSavedDocument })),
+);
+
+export const lastUpdatedAtAtom = atom(
+  (get) => get(documentAtom).lastUpdatedAt,
+  (get, set, newLastUpdatedAt?: Date) =>
+    set(documentAtom, (prev) => ({ ...prev, lastUpdatedAt: newLastUpdatedAt })),
 );

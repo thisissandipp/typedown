@@ -13,8 +13,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Copy, Loader2, MoreHorizontal, SquarePen, Star, StarOff, Trash2 } from 'lucide-react';
 import { sidebarDocumentsAtom, type SidebarDocument } from '@/store/sidebarDocuments';
+import { Loader2, MoreHorizontal, Star, StarOff, Trash2 } from 'lucide-react';
 import { SidebarMenuAction } from '@/components/ui/sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { redirect } from 'next/navigation';
@@ -131,7 +131,7 @@ export function NavDropdownActions({ item }: { item: SidebarDocument }) {
               </>
             )}
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
+          {/* <DropdownMenuSeparator />
           <DropdownMenuItem>
             <Copy className="text-muted-foreground" />
             <span>Duplicate</span>
@@ -139,7 +139,7 @@ export function NavDropdownActions({ item }: { item: SidebarDocument }) {
           <DropdownMenuItem>
             <SquarePen className="text-muted-foreground" />
             <span>Rename document</span>
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
           <DropdownMenuSeparator />
           <DialogTrigger asChild>
             <DropdownMenuItem className="group">

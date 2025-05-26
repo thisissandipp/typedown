@@ -17,7 +17,6 @@ export function EditableTitle({ title, onTitleChange }: EditableTitleProps) {
 
   const handleTitleClick = () => {
     setIsEditing(true);
-    console.log(`#EditableTitle: input value`, inputValue);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
