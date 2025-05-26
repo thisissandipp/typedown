@@ -1,17 +1,22 @@
 'use client';
 
-import { contentAtom, documentAtom, lastSavedContentAtom, titleAtom } from '@/store/document';
+import {
+  contentAtom,
+  documentAtom,
+  lastSavedContentAtom,
+  lastUpdatedAtAtom,
+  titleAtom,
+} from '@/store/document';
 import { type SidebarDocument, sidebarDocumentsAtom } from '@/store/sidebarDocuments';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { LastUpdatedBadge } from '@/components/last-updated-badge';
 import { EditableTitle } from '@/components/editable-title';
 import { EditorCanvas } from '@/components/editor-canvas';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { Skeleton } from '@/components/ui/skeleton';
-// import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useParams } from 'next/navigation';
 import Markdown from 'react-markdown';
-// import { Clock8 } from 'lucide-react';
 import remarkGfm from 'remark-gfm';
 import { Document } from '@/types';
 import { toast } from 'sonner';
@@ -31,11 +36,14 @@ export default function DocumentIdPage() {
     content: currentContent,
     saveStatus,
     lastSavedContent,
+    lastUpdatedAt,
   } = useAtomValue(documentAtom);
 
   const setTitle = useSetAtom(titleAtom);
   const setCurrentContent = useSetAtom(contentAtom);
+
   const setLastSavedContent = useSetAtom(lastSavedContentAtom);
+  const setLastUpdatedAt = useSetAtom(lastUpdatedAtAtom);
 
   const [sidebarDocuments, setSidebarDocuments] = useAtom(sidebarDocumentsAtom);
 
@@ -67,6 +75,7 @@ export default function DocumentIdPage() {
           description: response.data?.message || response.statusText,
         });
       } else {
+        setLastUpdatedAt(new Date());
         toast('Title updated', { description: 'The title of this document has been saved.' });
       }
     } catch (error) {
@@ -102,7 +111,16 @@ export default function DocumentIdPage() {
     setTitle(document?.title ?? '');
     setCurrentContent(document?.content ?? undefined);
     setLastSavedContent(document?.content ?? undefined);
-  }, [document?.title, document?.content, setTitle, setCurrentContent, setLastSavedContent]);
+    setLastUpdatedAt(document?.updatedAt);
+  }, [
+    document?.title,
+    document?.content,
+    document?.updatedAt,
+    setTitle,
+    setCurrentContent,
+    setLastSavedContent,
+    setLastUpdatedAt,
+  ]);
 
   if (error.length !== 0) {
     toast('An error has occurred', { description: error });
@@ -128,9 +146,6 @@ export default function DocumentIdPage() {
     );
   }
 
-  console.log(`#Page: it came here`, document);
-  console.log(`#Page: it came here with title`, title);
-
   return (
     <div className="relative isolate mx-auto max-w-3xl px-8 pt-14 lg:px-10">
       {saveStatus === 'inProgress' && <Badge variant="secondary">Syncing with server...</Badge>}
@@ -146,10 +161,8 @@ export default function DocumentIdPage() {
       {saveStatus === 'initial' && currentContent === lastSavedContent && (
         <Badge variant="secondary">Content is up to date</Badge>
       )}
-      {/* <Badge variant="outline" className="ml-2.5">
-        <Clock8 />
-        Updated on Sun, 25 May
-      </Badge> */}
+
+      {lastUpdatedAt && <LastUpdatedBadge lastUpdatedAt={lastUpdatedAt} />}
 
       <EditableTitle title={title} onTitleChange={handleTitleChange} />
 

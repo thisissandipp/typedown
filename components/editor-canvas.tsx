@@ -1,7 +1,12 @@
-import { contentAtom, lastSavedContentAtom, saveStatusAtom } from '@/store/document';
+import {
+  contentAtom,
+  lastSavedContentAtom,
+  lastUpdatedAtAtom,
+  saveStatusAtom,
+} from '@/store/document';
 import { Textarea } from '@/components/ui/textarea';
 import { useDebounce } from '@/hooks/use-debounce';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import axios from 'axios';
 import React from 'react';
 
@@ -13,6 +18,8 @@ export function EditorCanvas({ documentId }: EditorCanvasProps) {
   const [content, setContent] = useAtom(contentAtom);
   const [, setSaveStatus] = useAtom(saveStatusAtom);
   const [lastSavedContent, setLastSavedContent] = useAtom(lastSavedContentAtom);
+
+  const setLastUpdatedAt = useSetAtom(lastUpdatedAtAtom);
 
   const saveToLocalStorage = React.useCallback(
     (...args: unknown[]) => {
@@ -40,6 +47,7 @@ export function EditorCanvas({ documentId }: EditorCanvasProps) {
         if (response.status === 200) {
           setLastSavedContent(currentContent);
           setSaveStatus('success');
+          setLastUpdatedAt(new Date());
         } else {
           console.error('Failed to update document', response.data?.message || response.statusText);
           setSaveStatus('failed');
@@ -50,7 +58,7 @@ export function EditorCanvas({ documentId }: EditorCanvasProps) {
         setTimeout(() => setSaveStatus('initial'), 2000);
       }
     },
-    [documentId, lastSavedContent, setLastSavedContent, setSaveStatus],
+    [documentId, lastSavedContent, setLastSavedContent, setLastUpdatedAt, setSaveStatus],
   );
 
   const [debouncedSaveToServer] = useDebounce(saveToServer, 1000);

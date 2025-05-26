@@ -10,9 +10,10 @@ import { type SidebarDocument, sidebarDocumentsAtom } from '@/store/sidebarDocum
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
 import { redirect, useParams } from 'next/navigation';
+import { lastUpdatedAtAtom } from '@/store/document';
 import { Loader2, Star, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { toast } from 'sonner';
 import axios from 'axios';
 import React from 'react';
@@ -24,6 +25,8 @@ export function SiteHeader() {
   const [trashDialogOpen, setTrashDialogOpen] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [sidebarDocuments, setSidebarDocuments] = useAtom(sidebarDocumentsAtom);
+
+  const setLastUpdatedAt = useSetAtom(lastUpdatedAtAtom);
 
   const activeDoc = sidebarDocuments?.find((doc) => doc.id === documentId);
 
@@ -58,6 +61,7 @@ export function SiteHeader() {
         });
       } else {
         toast(successMessage, { description: successDescription });
+        setLastUpdatedAt(new Date());
       }
     } catch (error) {
       setSidebarDocuments(previousValue);
